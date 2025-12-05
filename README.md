@@ -1,212 +1,198 @@
-# Desenvolvimento-de-Sistemas---Loja-de-Musica
-📝 README.md — Projeto MusicaDB
-🎯 Objetivo
+#Desenvolvimento-de-sistemas---Loja-de-Musica
+📌 📁 Estrutura do Projeto
+/MusicaDb
+│── MusicaDb.API        → API REST (ASP.NET 8) com CRUD de Músicas e Álbuns
+│── MusicaDb.GUI        → Aplicação WPF integrada com a API
+│── MusicaDb.sln        → Solução principal
 
-Este projeto tem como objetivo construir uma API REST com persistência em banco de dados usando Entity Framework Core.
-O sistema realiza operações CRUD (Create, Read, Update, Delete) sobre uma entidade chamada Musica, tanto via API quanto via CLI (terminal).
+🚀 1. Como rodar o projeto completo
+✔ Passo 1 — Rodar a API
 
-🧩 Stack Utilizada
+No terminal:
 
-Linguagem: C#
-
-Framework: .NET 9 / ASP.NET Core Web API
-
-ORM: Entity Framework Core 9
-
-Banco de dados: SQLite (musica.db)
-
-Ferramentas de teste: Postman ou Swagger
-
-CLI (Console): integrado no Program.cs
-
-🧱 Estrutura do Projeto
-MusicaDB/
-│
-├── Controllers/
-│   └── MusicaController.cs
-│
-├── Data/
-│   └── AppDbContext.cs
-│
-├── Models/
-│   └── Musica.cs
-│
-├── Program.cs
-├── musica.db
-└── README.md
-
-🎵 Entidade: Musica
-Campo	Tipo	Obrigatório	Descrição
-Id	int	✅ Sim	Identificador único da música.
-Titulo	string	✅ Sim	Nome/título da música.
-Artista	string	✅ Sim	Nome do artista ou banda.
-DataCadastro	DateTime	✅ Sim	Data em que foi cadastrada.
-⚙️ Passos para Executar o Projeto
-1️⃣ Clonar o repositório
-git clone https://github.com/SEU_USUARIO/MusicaDB.git
-cd MusicaDB
-
-2️⃣ Restaurar dependências
-dotnet restore
-
-3️⃣ Criar o banco de dados via migrations
-dotnet ef migrations add InitialCreate
-dotnet ef database update
-
-4️⃣ Executar o projeto
+cd MusicaDb/MusicaDb.API
 dotnet run
 
 
-A API iniciará em:
+A API vai iniciar em:
 
 http://localhost:5099
 
+Endpoints incluem:
 
-E o Swagger estará disponível em:
+GET /api/v1/musica
 
-http://localhost:5099/swagger
+GET /api/v1/musica/{id}
 
-🚀 Rotas da API
-🔹 GET /api/v1/musica
+POST /api/v1/musica
 
-Lista todas as músicas cadastradas.
+PUT /api/v1/musica/{id}
 
-Exemplo de resposta:
+DELETE /api/v1/musica/{id}
 
-[
-  {
-    "id": 1,
-    "titulo": "Imagine",
-    "artista": "John Lennon",
-    "dataCadastro": "2025-10-21T22:00:00Z"
-  }
-]
+GET /api/v1/album
 
-🔹 GET /api/v1/musica/{id}
+✔ Passo 2 — Rodar a Interface WPF
 
-Retorna uma música específica pelo ID.
+Em outro terminal:
 
-Exemplo:
-
-GET /api/v1/musica/1
+cd MusicaDb/MusicaDb.GUI
+dotnet run
 
 
-Resposta:
+A GUI abrirá automaticamente e se conectará à sua API.
 
+🧠 2. Como a GUI funciona
+
+A aplicação WPF usa a classe ApiClient para consumir os endpoints:
+
+public class ApiClient
 {
-  "id": 1,
-  "titulo": "Imagine",
-  "artista": "John Lennon",
-  "dataCadastro": "2025-10-21T22:00:00Z"
-}
-
-🔹 POST /api/v1/musica
-
-Cadastra uma nova música.
-
-Body (JSON):
-
-{
-  "titulo": "Bohemian Rhapsody",
-  "artista": "Queen"
+    private readonly HttpClient _http = new()
+    {
+        BaseAddress = new Uri("http://localhost:5099/api/v1/")
+    };
 }
 
 
-Resposta (201 Created):
+Todos os comandos CRUD da interface chamam sua API real.
 
+📌 Tela Principal – Listagem de Músicas
+
+✔ Lista todas as músicas
+✔ Permite filtrar pelo título
+✔ Mostra artista, gênero e nome do álbum
+✔ Botões CRUD
+
+🔍 Busca de Músicas
+
+Digite um texto e clique Buscar.
+
+A busca é feita localmente na lista carregada da API.
+
+➕ Adicionar Música
+
+Botão Adicionar abre esta janela:
+
+Título:
+
+Artista:
+
+Gênero:
+
+Seleção de Álbum carregado da API:
+
+Ao salvar → chama o endpoint:
+
+POST /api/v1/musica
+
+✏ Editar Música
+
+Ao selecionar uma música → clique em Editar.
+O formulário abre preenchido.
+
+Ao salvar → chama:
+
+PUT /api/v1/musica/{id}
+
+🗑 Excluir Música
+
+Ao clicar em Excluir:
+
+Confirmação (MessageBox)
+
+Chama:
+
+DELETE /api/v1/musica/{id}
+
+
+🧩 4. Estrutura da GUI WPF
+MusicaDb.GUI
+│── MainWindow.xaml              → Tela principal (listagem + pesquisa + CRUD)
+│── MainWindow.xaml.cs           → Lógica da tela principal
+│── Views/
+│     └── EditarMusicaWindow.xaml → Janela de criação/edição
+│── Services/
+│     └── ApiClient.cs           → Comunicação com a API
+│── Models/
+      ├── MusicaDTO.cs
+      ├── AlbumDTO.cs
+      └── MusicaCreateDTO.cs
+
+🔌 5. Comunicação com a API
+
+A GUI usa HttpClient para enviar e receber JSON:
+
+✔ Listar músicas
+_http.GetFromJsonAsync<List<MusicaDTO>>("musica");
+
+✔ Criar música
+_http.PostAsJsonAsync("musica", dto);
+
+✔ Atualizar
+_http.PutAsJsonAsync($"musica/{id}", dto);
+
+✔ Excluir
+_http.DeleteAsync($"musica/{id}");
+
+🧱 6. Como testar no Postman
+
+Exemplos de requisições:
+
+📌 GET – Listar músicas
+GET http://localhost:5073/api/v1/musica
+
+📌 POST – Criar música
+POST http://localhost:5073/api/v1/musica
 {
-  "id": 2,
-  "titulo": "Bohemian Rhapsody",
-  "artista": "Queen",
-  "dataCadastro": "2025-10-21T22:00:00Z"
+  "titulo": "Minha Música",
+  "artista": "Fulano",
+  "genero": "Rock",
+  "albumId": 1
 }
 
-🔹 PUT /api/v1/musica/{id}
+📌 PUT – Atualizar
+PUT http://localhost:5073/api/v1/musica/1
 
-Atualiza uma música existente.
+📌 DELETE – Remover
+DELETE http://localhost:5073/api/v1/musica/1
 
-Exemplo:
+🛠 7. Requisitos
 
-PUT /api/v1/musica/2
+.NET 8 ou superior
 
+Windows (para WPF)
 
-Body (JSON):
+API rodando antes da GUI
 
-{
-  "titulo": "Bohemian Rhapsody (Remaster)",
-  "artista": "Queen"
-}
+Postman (opcional)
 
+📦 8. Como clonar e rodar
+git clone https://github.com/SEU_USUARIO/Desenvolvimento-de-Sistemas---Loja-de-Musica.git
+cd Desenvolvimento-de-Sistemas---Loja-de-Musica
 
-Resposta (200 OK)
+API:
+cd MusicaDb/MusicaDb.API
+dotnet run
 
-🔹 DELETE /api/v1/musica/{id}
+GUI:
+cd ../MusicaDb.GUI
+dotnet run
 
-Remove uma música do banco de dados.
+🎓 9. Objetivo Acadêmico
 
-Exemplo:
+Este projeto demonstra:
 
-DELETE /api/v1/musica/2
+✔ Criação de API REST
+✔ Consumo de API por GUI WPF
+✔ Padrão DTO
+✔ CRUD completo
+✔ Comunicação JSON
+✔ Uso de HttpClient
+✔ Separação entre backend e frontend desktop
 
+🧑‍💻 10. Autora
 
-Resposta (204 No Content)
-
-💻 Modo Console (CLI)
-
-O sistema também permite interagir via terminal durante a execução do programa:
-
-Opção	Descrição
-1	Cadastrar música
-2	Listar músicas
-3	Atualizar música (por ID)
-4	Remover música (por ID)
-0	Encerrar aplicação
-
-Exemplo de uso no terminal:
-
-== MusicaDbLab ==
-Console + API executando juntos!
-
-1 - Cadastrar música
-2 - Listar músicas
-3 - Atualizar música (por Id)
-4 - Remover música (por Id)
-0 - Sair
-
-⚠️ Validações e Tratamento de Erros
-
-400 Bad Request → Erros de entrada inválida.
-
-404 Not Found → Registro não encontrado.
-
-409 Conflict → Título duplicado.
-
-422 Unprocessable Entity → Dados não processáveis.
-
-As propriedades Titulo, Artista e DataCadastro são obrigatórias, e o título é único.
-
-📘 Testes com Postman
-
-Criar uma nova coleção.
-
-Adicionar as rotas GET, POST, PUT, DELETE.
-
-Usar o formato JSON conforme exemplos acima.
-
-O endereço base é http://localhost:5099/api/v1/musica.
-
-🧮 Critérios de Avaliação Atendidos
-Critério	Peso	Situação
-Banco de Dados (chaves, schema, EF Core)	40 pts	✅ Concluído
-API & CRUD completos (GET/POST/PUT/DELETE)	40 pts	✅ Concluído
-Validação & Erros (DataAnnotations, status codes)	10 pts	✅ Concluído
-Qualidade de código (organização, clareza, clean code)	5 pts	✅ Concluído
-Documentação (README.md)	5 pts	✅ Concluído
-Total estimado:	100 pts	🏆 Perfeito!
-
-👩‍💻 Autora
 Isabella Campos Bueno
-Luiz Felipe Campos 
-Curso: Engenharia da Computação
-Disciplina: Desenvolvimento de Sistemas — Projeto Banco de Dados + API
-Instituição: [CEUB]
+Luiz Felipe Campos da Silva
+Desenvolvedora • Engenharia da Computação • Cybersecurity
