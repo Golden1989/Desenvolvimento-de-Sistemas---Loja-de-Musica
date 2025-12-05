@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\isabe\\OneDrive\\Documentos\\MusicaDb\\musica\\musica.csproj": {}
+    "C:\\Users\\isabe\\OneDrive\\Documentos\\projetos_pessoais\\Desenvolvimento-de-Sistemas---Loja-de-Musica\\MusicaDb\\Musica\\musica.csproj": {}
   },
   "projects": {
-    "C:\\Users\\isabe\\OneDrive\\Documentos\\MusicaDb\\musica\\musica.csproj": {
+    "C:\\Users\\isabe\\OneDrive\\Documentos\\projetos_pessoais\\Desenvolvimento-de-Sistemas---Loja-de-Musica\\MusicaDb\\Musica\\musica.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\isabe\\OneDrive\\Documentos\\MusicaDb\\musica\\musica.csproj",
+        "projectUniqueName": "C:\\Users\\isabe\\OneDrive\\Documentos\\projetos_pessoais\\Desenvolvimento-de-Sistemas---Loja-de-Musica\\MusicaDb\\Musica\\musica.csproj",
         "projectName": "musica",
-        "projectPath": "C:\\Users\\isabe\\OneDrive\\Documentos\\MusicaDb\\musica\\musica.csproj",
+        "projectPath": "C:\\Users\\isabe\\OneDrive\\Documentos\\projetos_pessoais\\Desenvolvimento-de-Sistemas---Loja-de-Musica\\MusicaDb\\Musica\\musica.csproj",
         "packagesPath": "C:\\Users\\isabe\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\isabe\\OneDrive\\Documentos\\MusicaDb\\musica\\obj\\",
+        "outputPath": "C:\\Users\\isabe\\OneDrive\\Documentos\\projetos_pessoais\\Desenvolvimento-de-Sistemas---Loja-de-Musica\\MusicaDb\\Musica\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\isabe\\AppData\\Roaming\\NuGet\\NuGet.Config"

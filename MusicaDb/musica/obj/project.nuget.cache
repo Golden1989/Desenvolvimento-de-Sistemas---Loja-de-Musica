@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "upTZ4ApML+k=",
+  "dgSpecHash": "lh+cir2GEbY=",
   "success": true,
-  "projectFilePath": "C:\\Users\\isabe\\OneDrive\\Documentos\\MusicaDb\\musica\\musica.csproj",
+  "projectFilePath": "C:\\Users\\isabe\\OneDrive\\Documentos\\projetos_pessoais\\Desenvolvimento-de-Sistemas---Loja-de-Musica\\MusicaDb\\Musica\\musica.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\isabe\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\isabe\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\7.0.0\\microsoft.bcl.asyncinterfaces.7.0.0.nupkg.sha512",

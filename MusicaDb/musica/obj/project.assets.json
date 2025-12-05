@@ -3516,11 +3516,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\isabe\\OneDrive\\Documentos\\MusicaDb\\musica\\musica.csproj",
+      "projectUniqueName": "C:\\Users\\isabe\\OneDrive\\Documentos\\projetos_pessoais\\Desenvolvimento-de-Sistemas---Loja-de-Musica\\MusicaDb\\musica\\musica.csproj",
       "projectName": "musica",
-      "projectPath": "C:\\Users\\isabe\\OneDrive\\Documentos\\MusicaDb\\musica\\musica.csproj",
+      "projectPath": "C:\\Users\\isabe\\OneDrive\\Documentos\\projetos_pessoais\\Desenvolvimento-de-Sistemas---Loja-de-Musica\\MusicaDb\\musica\\musica.csproj",
       "packagesPath": "C:\\Users\\isabe\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\isabe\\OneDrive\\Documentos\\MusicaDb\\musica\\obj\\",
+      "outputPath": "C:\\Users\\isabe\\OneDrive\\Documentos\\projetos_pessoais\\Desenvolvimento-de-Sistemas---Loja-de-Musica\\MusicaDb\\musica\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\isabe\\AppData\\Roaming\\NuGet\\NuGet.Config"
