@@ -5,7 +5,7 @@ using musica.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Porta fixa (opcional, facilita testes)
+// Porta fixa (igual ao exemplo do professor)
 builder.WebHost.UseUrls("http://localhost:5099");
 
 builder.Services.AddControllers();
@@ -25,6 +25,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapControllers();
 
+// Executa migrations automaticamente
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -34,17 +35,19 @@ using (var scope = app.Services.CreateScope())
 var webTask = app.RunAsync();
 Console.WriteLine("API online em http://localhost:5099 (Swagger em /swagger)");
 
-Console.WriteLine("== MusicaDbLab ==");
-Console.WriteLine("Console + API executando juntos!");
+Console.WriteLine("== MusicStoreDb ==");
+Console.WriteLine("Console + API executando juntos!\n");
 
 while (true)
 {
-    Console.WriteLine();
-    Console.WriteLine("Escolha uma opção:");
-    Console.WriteLine("1 - Cadastrar música");
-    Console.WriteLine("2 - Listar músicas");
-    Console.WriteLine("3 - Atualizar música (por Id)");
-    Console.WriteLine("4 - Remover música (por Id)");
+    Console.WriteLine("\nEscolha uma opção:");
+    Console.WriteLine("1 - Cadastrar Álbum");
+    Console.WriteLine("2 - Listar Álbums");
+    Console.WriteLine("3 - Atualizar Álbum");
+    Console.WriteLine("4 - Remover Álbum");
+    Console.WriteLine("5 - Cadastrar Música");
+    Console.WriteLine("6 - Listar Músicas");
+    Console.WriteLine("7 - Listar Músicas de um Álbum (INNER JOIN)");
     Console.WriteLine("0 - Sair");
     Console.Write("> ");
 
@@ -54,10 +57,13 @@ while (true)
 
     switch (opt)
     {
-        case "1": await CreateMusicaAsync(); break;
-        case "2": await ListMusicasAsync(); break;
-        case "3": await UpdateMusicaAsync(); break;
-        case "4": await DeleteMusicaAsync(); break;
+        case "1": await CreateAlbumAsync(); break;
+        case "2": await ListAlbumsAsync(); break;
+        case "3": await UpdateAlbumAsync(); break;
+        case "4": await DeleteAlbumAsync(); break;
+        case "5": await CreateMusicAsync(); break;
+        case "6": await ListMusicasAsync(); break;
+        case "7": await ListMusicasByAlbumAsync(); break;
         default: Console.WriteLine("Opção inválida."); break;
     }
 }
@@ -65,9 +71,110 @@ while (true)
 await app.StopAsync();
 await webTask;
 
-// ===================== MÉTODOS AUXILIARES ===================== //
+//
+// ===== FUNÇÕES DO CONSOLE =====
+//
 
-async Task CreateMusicaAsync()
+async Task CreateAlbumAsync()
+{
+    Console.Write("Nome do álbum: ");
+    var nome = (Console.ReadLine() ?? "").Trim();
+
+    Console.Write("Ano: ");
+    if (!int.TryParse(Console.ReadLine(), out var ano))
+    {
+        Console.WriteLine("Ano inválido.");
+        return;
+    }
+
+    if (string.IsNullOrWhiteSpace(nome))
+    {
+        Console.WriteLine("Nome é obrigatório.");
+        return;
+    }
+
+    using var db = new AppDbContext();
+    var album = new Album { Nome = nome, Ano = ano };
+    db.Albuns.Add(album);
+    await db.SaveChangesAsync();
+
+    Console.WriteLine($"Álbum cadastrado! Id: {album.Id}");
+}
+
+async Task ListAlbumsAsync()
+{
+    using var db = new AppDbContext();
+    var albuns = await db.Albuns.OrderBy(a => a.Id).ToListAsync();
+
+    if (!albuns.Any())
+    {
+        Console.WriteLine("Nenhum álbum cadastrado.");
+        return;
+    }
+
+    Console.WriteLine("\nÁlbuns cadastrados:");
+    foreach (var a in albuns)
+        Console.WriteLine($"{a.Id} - {a.Nome} ({a.Ano})");
+}
+
+async Task UpdateAlbumAsync()
+{
+    Console.Write("Informe o Id do álbum: ");
+    if (!int.TryParse(Console.ReadLine(), out var id))
+    {
+        Console.WriteLine("Id inválido.");
+        return;
+    }
+
+    using var db = new AppDbContext();
+    var album = await db.Albuns.FindAsync(id);
+
+    if (album is null)
+    {
+        Console.WriteLine("Álbum não encontrado.");
+        return;
+    }
+
+    Console.WriteLine($"Atualizando Álbum {album.Id}: {album.Nome} ({album.Ano})");
+
+    Console.Write("Novo nome (vazio mantém): ");
+    var novoNome = Console.ReadLine()?.Trim();
+    if (!string.IsNullOrWhiteSpace(novoNome)) album.Nome = novoNome;
+
+    Console.Write("Novo ano (vazio mantém): ");
+    var anoStr = Console.ReadLine()?.Trim();
+    if (!string.IsNullOrWhiteSpace(anoStr) && int.TryParse(anoStr, out var novoAno))
+        album.Ano = novoAno;
+
+    await db.SaveChangesAsync();
+    Console.WriteLine("Álbum atualizado!");
+}
+
+async Task DeleteAlbumAsync()
+{
+    Console.Write("Id do álbum: ");
+    if (!int.TryParse(Console.ReadLine(), out var id))
+    {
+        Console.WriteLine("Id inválido.");
+        return;
+    }
+
+    using var db = new AppDbContext();
+    var album = await db.Albuns.FindAsync(id);
+
+    if (album is null)
+    {
+        Console.WriteLine("Álbum não encontrado.");
+        return;
+    }
+
+    db.Albuns.Remove(album);
+    await db.SaveChangesAsync();
+
+    Console.WriteLine("Álbum removido.");
+}
+
+async Task CreateMusicAsync()
 {
     Console.Write("Título: ");
     var titulo = (Console.ReadLine() ?? "").Trim();
@@ -75,45 +182,62 @@ async Task CreateMusicaAsync()
     Console.Write("Artista: ");
     var artista = (Console.ReadLine() ?? "").Trim();
 
-    if (string.IsNullOrWhiteSpace(titulo) || string.IsNullOrWhiteSpace(artista))
+    Console.Write("Gênero: ");
+    var genero = (Console.ReadLine() ?? "").Trim();
+
+    Console.Write("Id do álbum: ");
+    if (!int.TryParse(Console.ReadLine(), out var albumId))
     {
-        Console.WriteLine("Título e Artista são obrigatórios.");
+        Console.WriteLine("Id inválido.");
         return;
     }
 
     using var db = new AppDbContext();
-    var exists = await db.Musicas.AnyAsync(m => m.Titulo == titulo);
-    if (exists)
+    var album = await db.Albuns.FindAsync(albumId);
+
+    if (album is null)
     {
-        Console.WriteLine("Já existe uma música com esse título cadastrada.");
+        Console.WriteLine("Álbum não encontrado.");
         return;
     }
 
-    var musica = new Musica { Titulo = titulo, Artista = artista, DataCadastro = DateTime.UtcNow };
+    var musica = new Musica
+    {
+        Titulo = titulo,
+        Artista = artista,
+        Genero = genero,
+        AlbumId = albumId
+    };
+
     db.Musicas.Add(musica);
     await db.SaveChangesAsync();
-    Console.WriteLine($"Cadastrada com sucesso! Id: {musica.Id}");
+
+    Console.WriteLine($"Música cadastrada! Id: {musica.Id}");
 }
 
 async Task ListMusicasAsync()
 {
     using var db = new AppDbContext();
-    var musicas = await db.Musicas.OrderBy(m => m.Id).ToListAsync();
 
-    if (musicas.Count == 0)
+    var musicas = await db.Musicas
+        .Include(m => m.Album)
+        .OrderBy(m => m.Id)
+        .ToListAsync();
+
+    if (!musicas.Any())
     {
-        Console.WriteLine("Nenhuma música encontrada.");
+        Console.WriteLine("Nenhuma música cadastrada.");
         return;
     }
 
-    Console.WriteLine("Id | Título               | Artista               | DataCadastro (UTC)");
+    Console.WriteLine("\nMúsicas cadastradas:");
     foreach (var m in musicas)
-        Console.WriteLine($"{m.Id,2} | {m.Titulo,-20} | {m.Artista,-20} | {m.DataCadastro:yyyy-MM-dd HH:mm:ss}");
+        Console.WriteLine($"{m.Id} - {m.Titulo} ({m.Artista}) | Álbum: {m.Album?.Nome}");
 }
 
-async Task UpdateMusicaAsync()
+async Task ListMusicasByAlbumAsync()
 {
-    Console.Write("Informe o Id da música a atualizar: ");
+    Console.Write("Id do álbum: ");
     if (!int.TryParse(Console.ReadLine(), out var id))
     {
         Console.WriteLine("Id inválido.");
@@ -121,48 +245,28 @@ async Task UpdateMusicaAsync()
     }
 
     using var db = new AppDbContext();
-    var musica = await db.Musicas.FirstOrDefaultAsync(m => m.Id == id);
-    if (musica is null)
+    var album = await db.Albuns.FindAsync(id);
+
+    if (album is null)
     {
-        Console.WriteLine("Música não encontrada.");
+        Console.WriteLine("Álbum não encontrado.");
         return;
     }
 
-    Console.WriteLine($"Atualizando Id {musica.Id}. Deixe em branco para manter.");
-    Console.WriteLine($"Título atual : {musica.Titulo}");
-    Console.Write("Novo título  : ");
-    var newTitulo = (Console.ReadLine() ?? "").Trim();
+    var musicas = await db.Musicas
+        .Where(m => m.AlbumId == id)
+        .OrderBy(m => m.Titulo)
+        .ToListAsync();
 
-    Console.WriteLine($"Artista atual: {musica.Artista}");
-    Console.Write("Novo artista : ");
-    var newArtista = (Console.ReadLine() ?? "").Trim();
+    Console.WriteLine($"\nÁlbum: {album.Nome} ({album.Ano})");
 
-    if (!string.IsNullOrWhiteSpace(newTitulo)) musica.Titulo = newTitulo;
-    if (!string.IsNullOrWhiteSpace(newArtista)) musica.Artista = newArtista;
-
-    await db.SaveChangesAsync();
-    Console.WriteLine("Música atualizada com sucesso.");
-}
-
-async Task DeleteMusicaAsync()
-{
-    Console.Write("Informe o Id da música a remover: ");
-    if (!int.TryParse(Console.ReadLine(), out var id))
+    if (!musicas.Any())
     {
-        Console.WriteLine("Id inválido.");
+        Console.WriteLine("  (Sem músicas)");
         return;
     }
 
-    using var db = new AppDbContext();
-    var musica = await db.Musicas.FirstOrDefaultAsync(m => m.Id == id);
-    if (musica is null)
-    {
-        Console.WriteLine("Música não encontrada.");
-        return;
-    }
-
-    db.Musicas.Remove(musica);
-    await db.SaveChangesAsync();
-    Console.WriteLine("Música removida com sucesso.");
+    foreach (var m in musicas)
+        Console.WriteLine($"  - {m.Titulo} ({m.Artista})");
 }
 
